@@ -16,4 +16,5 @@ cat > "$out/Contents/Info.plist" <<PLIST
   <key>LSUIElement</key><true/>
 </dict></plist>
 PLIST
-codesign -s - --force "$out" >/dev/null 2>&1
+# CODESIGN_IDENTITY 를 주면 그 인증서로 서명한다(다시 빌드해도 손쉬운 사용 허용이 유지됨). 없으면 임시 서명.
+codesign -s "${CODESIGN_IDENTITY:--}" --force "$out" >/dev/null 2>&1

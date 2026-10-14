@@ -7,5 +7,5 @@ if [ -f "$settings" ]; then
   jq 'if .hooks then .hooks |= (with_entries(.value |= map(select((.hooks | tostring | contains("claude-revive-hook")) | not))) | with_entries(select(.value | length > 0))) else . end' "$settings" > "$tmp" && mv "$tmp" "$settings"
 fi
 rm -f "$HOME/Library/LaunchAgents/dev.claude-revive.plist"
-rm -rf "$HOME/Applications/Claude Revive.app" "$HOME/.claude-revive"
+rm -rf "/Applications/Claude Revive.app" "$HOME/.claude-revive"
 echo "제거 완료."

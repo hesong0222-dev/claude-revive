@@ -6,11 +6,11 @@ command -v jq >/dev/null || { echo "jq가 필요합니다: brew install jq"; exi
 src=$(cd "$(dirname "$0")" && pwd)
 base="$HOME/.claude-revive"
 settings="$HOME/.claude/settings.json"
-app="$HOME/Applications/Claude Revive.app"
+app="/Applications/Claude Revive.app"
 label="dev.claude-revive"
 plist="$HOME/Library/LaunchAgents/$label.plist"
 
-mkdir -p "$base/bin" "$HOME/.claude" "$HOME/Applications" "$HOME/Library/LaunchAgents"
+mkdir -p "$base/bin" "$HOME/.claude" "$HOME/Library/LaunchAgents"
 cp "$src/bin/claude-revive-hook" "$src/bin/claude-revive-find" "$base/bin/"
 chmod +x "$base/bin/"*
 
