@@ -1,0 +1,26 @@
+#!/bin/bash
+# 클로드 코드 훅. 일하는 중인 세션을 busy/ 에 적어 두고, 일이 끝나면 지운다.
+# 맥이 갑자기 꺼지면 지울 기회가 없으니, 재부팅 뒤 busy/ 에 남은 세션이 "끊긴 세션"이다.
+dir="${CLAUDE_REVIVE_DIR:-$HOME/.claude-revive}/busy"
+mkdir -p "$dir"
+input=$(cat)
+id=$(jq -r '.session_id // empty' <<<"$input")
+[ -z "$id" ] && exit 0
+
+case $(jq -r '.hook_event_name' <<<"$input") in
+  UserPromptSubmit)
+    jq -c '{session_id, cwd, permission_mode}' <<<"$input" > "$dir/$id.json"
+    ;;
+  Stop)
+    # 답은 끝났어도 예약 작업(크론)이나 백그라운드 작업이 남아 있으면 아직 일하는 중이다.
+    pending=$(jq '((.background_tasks // []) | length) + ((.session_crons // []) | length)' <<<"$input")
+    [ "$pending" = 0 ] && rm -f "$dir/$id.json"
+    ;;
+  SessionEnd)
+    # 사용자가 직접 끝낸 경우만 지운다. 앱 종료·시스템 종료(reason=other)는 남겨서 재부팅 뒤 살린다.
+    case $(jq -r '.reason' <<<"$input") in
+      clear|logout|prompt_input_exit) rm -f "$dir/$id.json" ;;
+    esac
+    ;;
+esac
+exit 0

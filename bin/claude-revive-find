@@ -1,0 +1,19 @@
+#!/bin/bash
+# 부팅 전에 일하다 끊긴 채팅을 찾아 클로드 앱 세션 번호(local_...)를 한 줄에 하나씩 출력한다.
+base="${CLAUDE_REVIVE_DIR:-$HOME/.claude-revive}"
+sessions="$HOME/Library/Application Support/Claude/claude-code-sessions"
+mkdir -p "$base/busy" "$base/revived"
+boot=$(sysctl -n kern.boottime | sed -E 's/^\{ sec = ([0-9]+),.*/\1/')
+
+for f in "$base"/busy/*.json; do
+  [ -e "$f" ] || continue
+  t=$(stat -f %m "$f")
+  [ "$t" -lt "$boot" ] || continue  # 부팅 뒤에 기록된 건 지금 살아 있는 세션이다.
+  [ "$t" -gt $((boot - 86400)) ] || { rm -f "$f"; continue; }  # 꺼지기 하루 전보다 오래된 기록은 버린다.
+  id=$(basename "$f" .json)
+  app=$(grep -rl "\"cliSessionId\":\"$id\"" "$sessions" 2>/dev/null | head -1)
+  mv "$f" "$base/revived/"
+  [ -n "$app" ] || continue  # 터미널에서 쓰던 세션은 대상이 아니다.
+  [ "$(jq -r '.isArchived' "$app")" = true ] && continue
+  jq -r '.sessionId' "$app"
+done
