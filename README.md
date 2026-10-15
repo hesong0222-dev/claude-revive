@@ -1,3 +1,5 @@
+<p align="center"><img src="assets/mascot.png" width="160"></p>
+
 # Claude Revive
 
 맥이 갑자기 꺼지거나 재시작돼도, **클로드 코드 앱에서 일하던 채팅을 기억했다가 다시 깨워** 하던 일을 이어서 하게 해 주는 작은 도구입니다.
